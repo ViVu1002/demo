@@ -13,6 +13,7 @@ interface PersonRepositoryInterface extends BaseRepositoryInterface
     public function search($data = [], $subject_count = 0);
 
     public function getPoint();
+
 }
 
 ?>

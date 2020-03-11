@@ -110,6 +110,7 @@
                             </div>
                         @endif
                     </div>
+                    <input type="hidden" name="slug">
                     {!! Form::submit('Submit', ['style' => 'margin:0 0 20px 20px', 'class' => 'btn btn-success']) !!}
                     {!! Form::close() !!}
                 </div>

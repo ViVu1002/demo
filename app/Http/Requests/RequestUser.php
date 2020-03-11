@@ -25,7 +25,7 @@ class RequestUser extends FormRequest
     {
         $validation = [
             'name' => 'required',
-            'email' => 'required|email|unique:persons',
+            'email' => 'required|email|unique:users',
             'phone' => 'required|regex:/(0)[0-9]{9}/',
             'image' => 'required|image|mimes:jpg,jpeg,png,gif,svg|max:2048',
             'admin' => 'required',

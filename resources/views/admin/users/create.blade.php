@@ -28,7 +28,7 @@
                 <div class="form-group">
                     {!! Form::label('name','Name') !!}
                     <span class="required">*</span>
-                    <input class="form-control" name="name" type="text" value="">
+                    <input class="form-control" name="name" type="text" value="{{old('name')}}">
                 </div>
                 @if($errors->has('name'))
                     <div class="error-text">
@@ -38,7 +38,7 @@
                 <div class="form-group">
                     {!! Form::label('email','Email') !!}
                     <span class="required">*</span>
-                    {!! Form::email('email','',['class' => 'form-control','placeholder' => 'Email']) !!}
+                    {!! Form::email('email','',['class' => 'form-control','old' => 'email','placeholder' => 'Email']) !!}
                     @if($errors->has('email'))
                         <div class="error-text">
                             {{$errors->first('email')}}
@@ -48,7 +48,7 @@
                 <div class="form-group">
                     {!! Form::label('phone','Phone') !!}
                     <span class="required">*</span>
-                    <input class="form-control" style="width: 50%" type="text" placeholder="Phone" name="phone">
+                    <input class="form-control" style="width: 50%" type="text" placeholder="Phone" name="phone" value="{{old('phone')}}">
                     @if($errors->has('phone'))
                         <div class="error-text">
                             {{$errors->first('phone')}}
@@ -66,8 +66,9 @@
                     @endif
                 </div>
                 <div class="form-group">
-                    <input class="form-control" placeholder="Password" name="password" type="password" value="">
+                    {!! Form::label('password','Password') !!}
                     <span class="required">*</span>
+                    <input class="form-control" placeholder="Password" name="password" type="password" value="{{old('password')}}">
                 </div>
                 @if($errors->has('password'))
                     <div class="error-text">
@@ -75,8 +76,9 @@
                     </div>
                 @endif
                 <div class="form-group">
-                    <input class="form-control" placeholder="Re-password" name="re-password" type="password" value="">
-                    {!! Form::label('phone','Phone') !!}
+                    {!! Form::label('re-password','Re-password') !!}
+                    <span class="required">*</span>
+                    <input class="form-control" placeholder="Re-password" name="re-password" type="password" value="{{old('re-password')}}">
                 </div>
                 @if($errors->has('re-password'))
                     <div class="error-text">
@@ -85,6 +87,7 @@
                 @endif
                 <div class="checkbox">
                     <label>
+                        <input name="admin" type="hidden" value="0">
                         <input name="admin" type="checkbox" value="1">Have you to be admin?
                     </label>
                 </div>

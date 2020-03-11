@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Lumino - Dashboard</title>
     <link href="{{ asset('css/back/bootstrap.min.css')}}" rel="stylesheet">
-    <link href="{{ asset('css/back/font-awesome.min.css')}}" rel="stylesheet">
     <link href="{{ asset('css/back/datepicker3.css')}}" rel="stylesheet">
     <link href="{{ asset('css/back/styles.css')}}" rel="stylesheet">
 
     <!--Custom Font-->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i,500,500i,600,600i,700,700i"
           rel="stylesheet">
-<!--[if lt IE 9]>
-	<script src="{{ asset('css/back/html5shiv.js')}}"></script>
-	<script src="{{ asset('css/back/respond.min.js')}}"></script>
-	<![endif]-->
+    <!--[if lt IE 9]>
+    <script src="{{ asset('css/back/html5shiv.js')}}"></script>
+    <script src="{{ asset('css/back/respond.min.js')}}"></script>
+    <![endif]-->
 </head>
 <body>
 
@@ -69,7 +68,7 @@
                     <h5>Date : {{$person->date}}</h5>
                     <h5>Phone : {{$person->phone}}</h5>
                     <a class="btn btn-info" href="{{ route('person.edit',$person->id) }}"><i
-                            class="fas fa-pencil-alt"></i> Update</a>
+                                class="fas fa-pencil-alt"></i> Update</a>
                 </div>
             </div>
         </div>
@@ -117,7 +116,7 @@
         </div>
     @endif
     @if ($errors->any())
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" style="margin-top: 30px">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -142,24 +141,47 @@
                 <div id="container">
                     @if ($errors->any())
                         <?php
-                        $subject_id = collect(old('subject_id'));
-                        $point = collect(old('point'));
-                        foreach ($point as $key => $value) {
-                            $combined = $subject_id->combine($point);
+                        if (old('subject_id') == '' && old('point') == '') {
+                            $a = 'No subject';
+                        } else {
+                            $subjects = collect(old('subject_id'));
+                            $point = collect(old('point'));
+                            foreach ($point as $key => $item) {
+                                $combined = $subjects->combine($point);
+                            }
+                            $results = collect($combined->whereNotBetween('point', [1, 10]));
+                            foreach ($results as $key => $result) {
+                                $value[] = $key;
+                            }
+                            $subject_points = \App\Subject::all(['name', 'id'])->whereIn('id', $value);
+                            $points = $results->implode('point', ',');
+                            $convert = explode(',', $points);
+                            foreach ($subject_points as $subject_point) {
+                                $subs[] = $subject_point;
+                            }
+                            foreach ($subs as $key => $sub) {
+                                foreach ($convert as $index => $con) {
+                                    if ($key == $index) {
+                                        $sub->point = $con;
+                                    }
+                                }
+                            }
+                            $subs = collect($subs);
+                            $sus = $subs->whereNotBetween('point', [0, 10]);
                         }
-                        $results = $combined->whereNotBetween('point', [1, 10]);
-                        //dd($results);
                         ?>
-                        @foreach ($results as $result)
-                            <select name="subject_id[]" class="form-control"
-                                    style="width:35%;display: inline;height:45px;">
-                                <option value="{{old('subject_id+x+')}}"></option>
-                                <input type="number" class="form-control"
-                                       style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;"
-                                       placeholder="Point"
-                                       name="point[][point]' + x + '" value="{{old('point+x+')}}"/>
-                            </select>
-                        @endforeach
+                        @if(!empty($subs))
+                            @foreach($subs as $sub)
+                                <select name="subject_id[]" class="form-control" id="convert"
+                                        style="width:35%;display: inline;height:45px;">
+                                    <option value="{{$sub->id}}">{{$sub->name}}</option>
+                                    <input type="number" class="form-control" id="convert_input"
+                                           style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;"
+                                           placeholder="Point"
+                                           name="point[][point]' + x + '" value="{{$sub->point}}"/>
+                                </select>
+                            @endforeach
+                        @endif
                     @endif
                 </div>
                 {!! Form::submit('Create point',array('class' => 'btn btn-info submit','style' => 'margin-top:20px')) !!}
@@ -191,24 +213,47 @@
                 <div id="container">
                     @if ($errors->any())
                         <?php
-                        $subject_id = collect(old('subject_id'));
-                        $point = collect(old('point'));
-                        foreach ($point as $key => $value) {
-                            $combined = $subject_id->combine($point);
+                        if (old('subject_id') == '' && old('point') == '') {
+                            $a = 'No subject';
+                        } else {
+                            $subject_id = collect(old('subject_id'));
+                            $point = collect(old('point'));
+                            foreach ($point as $key => $value) {
+                                $combined = $subject_id->combine($point);
+                            }
+                            $results = $combined->whereNotBetween('point', [1, 10]);
+                            foreach ($results as $key => $result) {
+                                $value[] = $key;
+                            }
+                            $subject_points = \App\Subject::all(['name', 'id'])->whereIn('id', $value);
+                            $points = $results->implode('point', ',');
+                            $convert = explode(',', $points);
+                            foreach ($subject_points as $subject_point) {
+                                $subs[] = $subject_point;
+                            }
+                            foreach ($subs as $key => $sub) {
+                                foreach ($convert as $index => $con) {
+                                    if ($key == $index) {
+                                        $sub->point = $con;
+                                    }
+                                }
+                            }
+                            $subs = collect($subs);
+                            $sus = $subs->whereNotBetween('point', [0, 10]);
                         }
-                        $results = $combined->whereNotBetween('point', [1, 10]);
-                        //dd($results);
                         ?>
-                        @foreach ($results as $result)
-                            <select name="subject_id[]" class="form-control"
-                                    style="width:35%;display: inline;height:45px;">
-                                <option value="{{old('subject_id+x+')}}"></option>
-                                <input type="number" class="form-control"
-                                       style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;"
-                                       placeholder="Point"
-                                       name="point[][point]' + x + '" value="{{old('point+x+')}}"/>
-                            </select>
-                        @endforeach
+                        @if(!empty($sus))
+                            @foreach ($sus as $sub)
+                                <select name="subject_id[]" class="form-control"
+                                        style="width:35%;display: inline;height:45px;">
+                                    <option value="{{$sub->id}}">{{$sub->name}}</option>
+                                    <input type="number" class="form-control"
+                                           style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;"
+                                           placeholder="Point"
+                                           name="point[][point]' + x + '" value="{{$sub->point}}"/>
+                                </select>
+                            @endforeach
+                        @endif
                     @endif
                 </div>
                 {!! Form::submit('Create point',array('class' => 'btn btn-info submit','style' => 'margin-top:20px')) !!}
@@ -220,10 +265,6 @@
 <script src="{{ asset('js/back/jquery-1.11.1.min.js')}}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="{{ asset('js/back/bootstrap.min.js')}}"></script>
-<script src="{{ asset('js/back/chart.min.js')}}"></script>
-<script src="{{ asset('js/back/chart-data.js')}}"></script>
-<script src="{{ asset('js/back/easypiechart.js')}}"></script>
-<script src="{{ asset('js/back/easypiechart-data.js')}}"></script>
 <script src="{{ asset('js/back/bootstrap-datepicker.js')}}"></script>
 <script src="{{ asset('js/back/custom.js')}}"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
@@ -244,7 +285,7 @@
                     '                                    @if(auth()->user()->admin == 0) @foreach($subject_points as $item) <option value="{{$item->id}}">{{$item->name}}</option> @endforeach @else @foreach($subjects as $subject)\n' +
                     '                                 <option value="{{$subject->id}}">{{$subject->name}}</option>\n' +
                     '                                    @endforeach @endif\n' +
-                    '                                </select>@if(auth()->user()->admin == 0)<input type="number" id="point' + x + '" class="form-control point" style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;" placeholder="Point" name="point[][point]' + x + '" value="0"/> @else <input type="number" id="point' + x + '" class="form-control point" style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;" placeholder="Point" name="point[][point]' + x + '" value="{{old('point+x+')}}"/> @endif' +
+                    '                                </select><input type="number" id="point' + x + '" class="form-control point" style="width: 35%;display: inline;margin-top: 20px;margin-left: 5px;" placeholder="Point" name="point[][point]' + x + '" value="{{old('point+x+')}}"/>' +
                     '<a href="javascript:void(0);" class="remove_button" title="Remove field">Remove</a></div>'));
                 x++;
             } else {

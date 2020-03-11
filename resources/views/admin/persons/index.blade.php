@@ -61,18 +61,32 @@
                     </div>
                     <div class="row" style="margin-left: 20px">
                         <div class="col-xs-12 col-md-12 col-lg-12">
-                            <h4 style="display:inline;margin-bottom: 10px">Phone</h4>
-                            {{ Form::checkbox('phones[]','(086|096|097|098|032|033|034|035|036|037|038|039)[0-9]{7}',false) }}
+                            <h4 style="display:inline;margin-bottom: 10px;">Phone</h4>
+                            {{ Form::checkbox('phones[]','(086|096|097|098|032|033|034|035|036|037|038|039)[0-9]{7}',false, ['style' => 'margin-left:60px']) }}
                             Viettel
                             {{ Form::checkbox('phones[]','(091|094|083|084|085|081|082)[0-9]{7}',false) }} Vinaphone
                             {{ Form::checkbox('phones[]','(090|093)[0-9]{7}',false) }} Mobiphone
                         </div>
                     </div>
+                    <div class="row" style="margin-left: 20px;margin-top:20px">
+                        <div class="col-xs-12 col-md-12 col-lg-12">
+                            <h4 style="display:inline;margin-bottom: 10px">Pagination</h4>
+                            <select class="form-control"
+                                    style="display: inline;width: 20%;margin-bottom: 25px;margin-left: 20px"
+                                    name="pagination" value="{{old('pagination')}}">
+                                <option value="0">Paginate</option>
+                                <option value="1">100</option>
+                                <option value="2">1000</option>
+                                <option value="3">3000</option>
+                            </select>
+                        </div>
+                    </div>
                     {!! Form::submit('Submit',['class' => 'btn btn-info','style' => 'margin: 30px 0 20px 40px']) !!}
                     {{ Form::close() }}
                 </div>
+                <h4 style="display: inline">Students <h5 style="display: inline">from </h5> {{$students->firstItem()}}
+                    <h5 style="display: inline"> to</h5> {{$students->lastItem()}} // {{$students->total()}}</h4>
                 @if($students->total() > 0)
-                    Students {{$students->firstItem()}} ->  {{$students->lastItem()}} // {{$students->total()}}
                     <table class="table">
                         <thead>
                         <tr>
@@ -84,27 +98,29 @@
                             <th>Address</th>
                             <th>Phone</th>
                             <th>Action</th>
-                            <a href="/test"
-                               style="background: #3e8f3e;display: inline-block;width: 70px;float: right;height: 43px;color: floralwhite">Send
-                                Email</a>
+                            @if(auth()->user()->admin == 1)
+                                <a href="/test"
+                                   style="background: #3e8f3e;display: inline-block;width: 70px;float: right;height: 43px;color: floralwhite">Send
+                                    Email</a>
+                            @endif
                         </tr>
                         </thead>
                         <tbody id="posts-crud">
                         @foreach($students as $key => $student)
                             <tr id="post_id_{{ $student->id }}">
                                 <td>{{ $key+1 }}</td>
-                                <td>{{$student->name}}</td>
+                                <td style="width: 100px;">{{$student->name}}</td>
                                 <td>
                                     <img src="{{asset($student->image)}}" style="width: 80px;height: 80px">
                                 </td>
-                                <td>{{$student->email}}</td>
-                                <td>{{$student->faculty->name}}</td>
-                                <td>{{$student->address}}</td>
-                                <td>{{$student->phone}}</td>
+                                <td style="width: 100px">{{$student->email}}</td>
+                                <td style="width: 80px">{{$student->faculty->name}}</td>
+                                <td style="width: 100px">{{$student->address}}</td>
+                                <td style="width: 100px">{{$student->phone}}</td>
                                 <td>
                                     {!! Form::open(['route' => ['person.destroy',$student->id],'method' => 'POST']) !!}
                                     <a class="btn btn-success"
-                                       href="{{ route('person.show',$student->id) }}">Detail</a>
+                                       href="{{ route('person.show',$student->slug) }}">Detail</a>
                                     <a class="btn btn-info" href="{{ route('person.edit',$student->id) }}">Edit</a>
                                     <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
                                        data-id="{{ $student->id }}"
@@ -112,7 +128,7 @@
                                     @csrf
                                     @method('DELETE')
                                     @if(auth()->user()->admin == 1)
-                                    {!! Form::submit('Delete',['class' => 'btn btn-danger']) !!}
+                                        {!! Form::submit('Delete',['class' => 'btn btn-danger']) !!}
                                     @endif
                                     {!! Form::close() !!}
                                 </td>
@@ -249,7 +265,7 @@
                     contentType: false,
                     processData: false,
                     success: function (data) {
-                        if(data.errors){
+                        if (data.errors) {
                             console.log(data);
                             $('#message').css('display', 'block');
                             $.each(data, function (key, value) {
@@ -258,7 +274,7 @@
                             $('#message').html(data.message);
                             $('#message').addClass(data.class_name);
                         }
-                        if(data.success){
+                        if (data.success) {
                             console.log(data);
                             alert('Update success');
                             $('#ajax-crud-modal').modal('hide');
