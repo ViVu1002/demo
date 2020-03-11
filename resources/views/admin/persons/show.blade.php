@@ -115,6 +115,11 @@
             <p>{{ $message }}</p>
         </div>
     @endif
+    @if ($message = Session::get('error'))
+        <div class="alert alert-danger" style="margin-top: 10px">
+            <p>{{ $message }}</p>
+        </div>
+    @endif
     @if ($errors->any())
         <div class="alert alert-danger" style="margin-top: 30px">
             <ul>

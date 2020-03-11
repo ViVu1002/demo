@@ -172,28 +172,33 @@ class PersonController extends Controller
 
     public function createOrUpdate(PointRequest $request, $id)
     {
-        $x = 0;
-        $subject_id = collect($request['subject_id']);
-        $point = collect($request['point']);
-        if (auth()->user()->admin == 0) {
-            foreach ($point as $key => $item) {
-                $result[]['point'] = 0;
+        $data_object = collect($request);
+        if(count($data_object) == 2){
+            return redirect()->back()->with('error','No subjects');
+        }else{
+            $x = 0;
+            $subject_id = collect($request['subject_id']);
+            $point = collect($request['point']);
+            if (auth()->user()->admin == 0) {
+                foreach ($point as $key => $item) {
+                    $result[]['point'] = 0;
+                }
+            } else {
+                foreach ($point as $key => $item) {
+                    $result[] = $item;
+                }
             }
-        } else {
-            foreach ($point as $key => $item) {
-                $result[] = $item;
+            $data = array_slice($result, $x);
+            if (count($subject_id) == count($data)) {
+                foreach ($subject_id as $key => $value) {
+                    $combined[$value] = $data[$x];
+                    $x++;
+                }
             }
+            $person = Person::find($id)->load('subjects');
+            $person->subjects()->syncWithoutDetaching($combined);
+            return redirect()->back()->with('success', 'Create point success');
         }
-        $data = array_slice($result, $x);
-        if (count($subject_id) == count($data)) {
-            foreach ($subject_id as $key => $value) {
-                $combined[$value] = $data[$x];
-                $x++;
-            }
-        }
-        $person = Person::find($id)->load('subjects');
-        $person->subjects()->syncWithoutDetaching($combined);
-        return redirect()->back()->with('success', 'Create point success');
     }
 
     public function deletePoint($person_id, $subject_id)

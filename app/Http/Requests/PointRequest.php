@@ -28,20 +28,30 @@ class PointRequest extends FormRequest
      */
     public function rules()
     {
-        $subjects = collect(\request('subject_id'));
-        $point = collect(\request('point'));
-        foreach ($point as $key => $item) {
-            $combined = $subjects->combine($point);
-        }
-        $results = collect($combined->whereBetween('point', [0, 10]));
-        $person = Person::find(\request('person_id'))->load('subjects');
-        $person->subjects()->syncWithoutDetaching($results);
-        $rules = [];
         $data = collect(\request());
         if(count($data) == 2){
-           $rules['subject_id'] = 'required';
+            $rules['subject_id'] = 'required';
+        }
+        if (count($data) == 4){
+            $subjects = collect(\request('subject_id'));
+            $point = collect(\request('point'));
+            foreach ($point as $key => $item) {
+                $combined = $subjects->combine($point);
+            }
+            $results = collect($combined->whereBetween('point', [0, 10]));
+            if (auth()->user()->admin == 0){
+                foreach ($results as $key => $result){
+                    $item[$key]['point']= 0;
+                }
+                $person = Person::find(\request('person_id'))->load('subjects');
+                $person->subjects()->syncWithoutDetaching($item);
+            }else{
+                $person = Person::find(\request('person_id'))->load('subjects');
+                $person->subjects()->syncWithoutDetaching($results);
+            }
         }
 
+        $rules = [];
         if (!empty(\request('point'))) {
             foreach (\request('point') as $key => $value) {
                 $rules['point.' . $key . '.point'] = 'required|numeric|distinct|min:0|max:10';
