@@ -9,4 +9,9 @@ class Faculty extends Model
     protected $fillable = ['name', 'description'];
 
     protected $primaryKey = 'id';
+
+    public function students(){
+        return $this->hasMany(Person::class);
+    }
+
 }

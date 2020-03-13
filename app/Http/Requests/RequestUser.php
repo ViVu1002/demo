@@ -25,16 +25,16 @@ class RequestUser extends FormRequest
     {
         $validation = [
             'name' => 'required',
-            'email' => 'required|email|unique:persons',
+            'email' => 'required|email|unique:users',
             'phone' => 'required|regex:/(0)[0-9]{9}/',
-            'image' => 'required|image|mimes:jpg,jpeg,png,gif,svg|max:2048',
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif,svg',
             'admin' => 'required',
             'password' => 'required|min:5',
             're-password' => 'required'
         ];
         if (!empty($this->id)) {
-            $validation['email'] = 'required|email|unique:users,id' . $this->id;
-            $validation['image'] = 'mimes:jpg,jpeg,png,gif,svg|max:2048';
+            $validation['email'] = 'required|email|unique:users,id,' . $this->id;
+            $validation['image'] = 'mimes:jpg,jpeg,png,gif,svg';
         }
         return $validation;
     }

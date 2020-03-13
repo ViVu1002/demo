@@ -24,7 +24,8 @@ class PersonsTableSeeder extends Seeder
                 'faculty_id' => $faker->numerify(1),
                 'date' => $faker->date(),
                 'gender' => $faker->numerify(1),
-                'image' => $faker->image(),
+                'image' => $faker->numerify(1),
+                'slug' => $faker->slug,
             ]);
         }
     }

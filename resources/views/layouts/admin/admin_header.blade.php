@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span></button>
             <a class="navbar-brand" href="#"><span>Lumino</span>Admin</a>
             <ul class="nav navbar-top-links navbar-right">
-                <li><a href="{{url('admin/settings')}}">Setting</a></li>
+                <li><a href="{{url('change-password')}}">Setting</a></li>
             </ul>
         </div>
     </div><!-- /.container-fluid -->

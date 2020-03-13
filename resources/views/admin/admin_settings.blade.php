@@ -28,25 +28,23 @@
                             <strong>{!! session('flash_message_success') !!}</strong>
                         </div>
                     @endif
-                    <div class="panel-body" style="margin:0 500px 0 500px">
+                    <div class="panel-body" style="margin:0 300px 0 300px">
                         @foreach($errors->all() as $error)
                             <li>{{$error}}</li>
                         @endforeach
-                        <form role="form" method="post" action="{{url('admin/update-pwd')}}" id="password_validate">
+                        <form role="form" method="post" action="{{url('change-password')}}">
                             {{ csrf_field() }}
                             <fieldset>
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Current password" name="current_pwd"
-                                           type="password" value="" id="currentpassword">
-                                    <span id="chkPwd"></span>
+                                    <input class="form-control" placeholder="Current password" name="cu-password"
+                                           type="password" value="">
                                 </div>
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Password" id="
-								" name="new_pwd" type="password" value="">
+                                    <input class="form-control" placeholder="Password" name="password" type="password" value="">
                                 </div>
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Repassword" id="comfirm_pwd" name="re_pwd"
-                                           type="password" autofocus="">
+                                    <input class="form-control" placeholder="Repassword" name="re-password"
+                                           type="password">
                                 </div>
                                 <input type="submit" class="btn btn-success" value="Submit">
                             </fieldset>

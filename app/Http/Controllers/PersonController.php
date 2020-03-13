@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Faculty;
 use App\Http\Requests\PointRequest;
 use App\Http\Requests\RequestPerson;
 
+use App\Point;
 use App\Repositories\Person\PersonRepositoryInterface;
 use App\Repositories\Faculty\FacultyRepositoryInterface;
 use App\Repositories\Subject\SubjectRepositoryInterface;
 use App\Repositories\Point\PointRepositoryInterface;
 use App\Subject;
 use App\Person;
+use function GuzzleHttp\Promise\all;
+use Illuminate\Support\Facades\DB;
 use Validator;
 use Illuminate\Http\Request;
 use Response;
+use Illuminate\Support\Facades\URL;
 
 class PersonController extends Controller
 {
@@ -43,8 +48,9 @@ class PersonController extends Controller
         $search = \request('search');
         $subject_count = Subject::all()->count();
         $students = $this->personRepository->search(request()->all(), $subject_count);
-        $faculties = $this->facultyRepository->getAllList();
-        return view('admin.persons.index', compact('students', 'search', 'persons', 'faculties'));
+        $fas = $students->load('faculty')->all();
+        $faculties = Faculty::all();
+        return view('admin.persons.index', compact('students','a','fas','items', 'search', 'persons', 'faculties'));
     }
 
     /*
@@ -69,6 +75,7 @@ class PersonController extends Controller
     {
         $data = $request->all();
         $data['image'] = $this->personRepository->uploadImages();
+        $data['slug'] = str_slug($data['name']);
         $post = $this->personRepository->create($data);
         return redirect()->route('person.index', compact('post'))->with('success', 'Create person success!');
     }
@@ -79,11 +86,11 @@ class PersonController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
         $subjects = $this->subjectRepository->getAllList();
-        $faculties = $this->facultyRepository->getAllList();
-        $person = Person::find($id);
+        $faculties = Faculty::all(['name', 'id']);
+        $person = Person::where('slug', $slug)->firstOrFail();
         if (!empty($person->subjects)) {
             $datas = $person->subjects;
             foreach ($datas as $data) {
@@ -91,7 +98,7 @@ class PersonController extends Controller
             }
         }
         $subject_points = $subjects->diff($datas);
-        response()->json(array('subjects' => $subjects, 'subject_points' => $subject_points, 'person' => $person, 'faculties' => $faculties));
+        response()->json(array('subjects' => $subjects, 'datas' => $datas, 'subject_points' => $subject_points, 'person' => $person, 'faculties' => $faculties));
         return view('admin.persons.show', compact('person', 'subjects', 'items', 'faculties', 'subject_points', 'datas'));
     }
 
@@ -142,6 +149,7 @@ class PersonController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $this->personRepository->uploadImages();
         }
+        $data['slug'] = str_slug($data['name']);
         $person = $this->personRepository->update($id, $data);
         return Response::json([
             'person' => $person,
@@ -165,15 +173,21 @@ class PersonController extends Controller
 
     public function createOrUpdate(PointRequest $request, $id)
     {
-        $request->flash();
-        if ($request['subject_id'] == '' && $request['point'] == '') {
-            return redirect()->back()->with('error', 'No subject and point');
-        } else {
+        $data_object = collect($request);
+        if(count($data_object) == 2){
+            return redirect()->back()->with('error','No subjects');
+        }else{
             $x = 0;
             $subject_id = collect($request['subject_id']);
             $point = collect($request['point']);
-            foreach ($point as $item) {
-                $result[] = $item;
+            if (auth()->user()->admin == 0) {
+                foreach ($point as $key => $item) {
+                    $result[]['point'] = 0;
+                }
+            } else {
+                foreach ($point as $key => $item) {
+                    $result[] = $item;
+                }
             }
             $data = array_slice($result, $x);
             if (count($subject_id) == count($data)) {
@@ -195,3 +209,4 @@ class PersonController extends Controller
         return redirect()->back()->with('success', 'Delete success!');
     }
 }
+//https://www.itsolutionstuff.com/post/laravel-53-how-to-create-seo-friendly-sluggable-urlexample.html
