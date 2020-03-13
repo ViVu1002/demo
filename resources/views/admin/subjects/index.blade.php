@@ -31,13 +31,23 @@
                         </div>
                     @endif
                 </div>
+                <div style="margin-bottom: 20px">
+                    <h4 style="display: inline; margin-left: 10px">Subjects
+                        <h5 style="display: inline">
+                            from </h5> {{$subjects->firstItem()}}
+                        <h5 style="display: inline"> to</h5> {{$subjects->lastItem()}} // {{$subjects->total()}}
+                    </h4>
+                </div>
+
                 <table class="table">
                     <thead>
                     <tr>
                         <th>STT</th>
                         <th>Name</th>
                         <th>Description</th>
-                        <th>Action</th>
+                        @if(auth()->user()->admin == 1)
+                            <th>Action</th>
+                        @endif
                     </tr>
                     </thead>
                     <tbody>
@@ -47,14 +57,14 @@
                             <td>{{$subject->name}}</td>
                             <td>{{$subject->description}}</td>
                             <td>
-                                <form action="{{ route('subject.destroy',$subject->id) }}" method="POST">
-                                    <a class="btn btn-info" href="{{ route('subject.edit',$subject->id) }}">Edit</a>
-                                    {{csrf_field()}}
-                                    @if(auth()->user()->admin == 1)
+                                @if(auth()->user()->admin == 1)
+                                    <form action="{{ route('subject.destroy',$subject->id) }}" method="POST">
+                                        <a class="btn btn-info" href="{{ route('subject.edit',$subject->id) }}">Edit</a>
+                                        {{csrf_field()}}
                                         <input name="_method" type="hidden" value="DELETE">
                                         <button type="submit" class="btn btn-danger">Delete</button>
-                                    @endif
-                                </form>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

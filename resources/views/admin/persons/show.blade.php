@@ -67,8 +67,9 @@
                     <h5>Address : {{$person->address}}</h5>
                     <h5>Date : {{$person->date}}</h5>
                     <h5>Phone : {{$person->phone}}</h5>
-                    <a class="btn btn-info" href="{{ route('person.edit',$person->id) }}"><i
-                                class="fas fa-pencil-alt"></i> Update</a>
+                    <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
+                       data-id="{{ $person->id }}"
+                       class="btn btn-info">Edit popup</a>
                 </div>
             </div>
         </div>
@@ -244,7 +245,7 @@
                                 }
                             }
                             $subs = collect($subs);
-                            $sus = $subs->whereNotBetween('point', [0, 10]);
+                            $sus = $subs->whereNotBetween('point', [1, 10]);
                         }
                         ?>
                         @if(!empty($sus))
@@ -266,6 +267,85 @@
             </div>
         </div>
     @endif
+
+    <div class="modal fade" id="ajax-crud-modal" tabindex="-1" role="dialog" aria-labelledby="ajax-crud-modal"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editForm" enctype="multipart/form-data">
+                @method('PUT')
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="postCrudModal">Update student</h4>
+                        <button aria-hidden="true" class="close" data-dismiss="modal" type="button">
+                            ×
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert" id="message" style="display: none">
+                            <ul></ul>
+                        </div>
+                        <div class="form-group" style="margin-left: 20px;margin-top: 20px">
+                            <input type="hidden" name="id" id="id">
+                            {!! Form::label('name','Name') !!}
+                            <span class="required">*</span>
+                            {!! Form::text('name','',['class' => 'form-control','id' => 'name', 'placeholder' => 'Name', 'style' => 'margin-top:15px;'])  !!}
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            {!! Form::label('email','Email') !!}
+                            <span class="required">*</span>
+                            {!! Form::email('email','',['class' => 'form-control','id' => 'email','placeholder' => 'Email']) !!}
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            <div>
+                                {!! Form::label('gender','Gender') !!}
+                                <span class="required">*</span>
+                            </div>
+                            Male {!! Form::radio('gender','1',['class' => 'radio']) !!}
+                            Female {!! Form::radio('gender','2',['class' => 'radio']) !!}
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            {!! Form::label('address','Address') !!}
+                            <span class="required">*</span>
+                            {!! Form::text('address','',['id' => 'address' ,'class'=>'form-control','placeholder'=>'Address']) !!}
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            {!! Form::label('phone','Phone') !!}
+                            <span class="required">*</span>
+                            <input class="form-control" type="text" value=""
+                                   placeholder="Phone" name="phone" id="phone">
+                        </div>
+                        <div class="form-group" style="width: 50%; margin-left: 20px">
+                            {!! Form::label('faculty_id','Faculty') !!}
+                            <span class="required">*</span>
+                            <select class="form-control" name="faculty_id" id="faculty_id">
+                                @foreach($faculties as $faculty)
+                                    <option value="{{$faculty->id}}">{{$faculty->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            {!! Form::label('image','Image') !!}
+                            <span class="required">*</span>
+                            <img src="" id="file"
+                                 style="width: 80px;height:80px;margin:0 0 20px 30px" name="file">
+                            {!! Form::file('image') !!}
+                        </div>
+                        <div class="form-group" style="margin-left: 20px">
+                            {!! Form::label('date','Date') !!}
+                            <span class="required">*</span>
+                            {{ Form::date('date', '', ['class' => 'form-control','id' => 'date']) }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-info" id="btn-edit" type="submit" value="add">
+                            Update student
+                        </button>
+                        <input class="btn btn-default" data-dismiss="modal" type="button" value="Cancel">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div><!--/.row-->
 <script src="{{ asset('js/back/jquery-1.11.1.min.js')}}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -279,13 +359,69 @@
 <script>
     //add point
     $(document).ready(function () {
+        //edit
+        const URL = "http://127.0.0.1:8000";
+        $('body').on('click', '#edit-post', function () {
+            var id = $(this).data('id');
+            $.get(URL + `/person/${id}` + `/edit`, function (data) {
+                $("#postCrudModal").html("Edit student");
+                $('#btn-save').val("edit-post");
+                $("#ajax-crud-modal").modal('show');
+                $("#id").val(data.id);
+                $("#name").val(data.name);
+                $("#email").val(data.email);
+                $(".radio:checked").val(data.gender);
+                $("#address").val(data.address);
+                $("#phone").val(data.phone);
+                $("#faculty_id").val(data.faculty_id);
+                $("#date").val(data.date);
+                $("#file").attr('src', data.image);
+            });
+        });
+
+        $("#editForm").on('submit', function (e) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            e.preventDefault();
+            var formData = new FormData($(this)[0]);
+            $.ajax({
+                type: 'POST',
+                url: URL + `/person/` + $("#editForm input[name=id]").val(),
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.errors) {
+                        console.log(data);
+                        $('#message').css('display', 'block');
+                        $.each(data, function (key, value) {
+                            $("#message").find("ul").append('<li>' + value + '</li>');
+                        });
+                        $('#message').html(data.message);
+                        $('#message').addClass(data.class_name);
+                    }
+                    if (data.success) {
+                        console.log(data);
+                        alert('Update success');
+                        $('#ajax-crud-modal').modal('hide');
+                        location.reload();
+                    }
+
+                },
+            });
+        });
+        //point
         var subject_points = $(@json($subject_points));
         var maxField = subject_points.length;
         var addButton = $('.add_button');
         var wrapper = $('.field_wrapper');
         var x = 1;
         $(addButton).click(function (event) {
-            if (x < maxField) {
+            if (x <= maxField) {
                 $(wrapper).append($('<div><select name="subject_id[]" class="form-control subjects" id="subjects' + x + '" style="width:35%;display: inline;height:45px " >\n' +
                     '                                    @if(auth()->user()->admin == 0) @foreach($subject_points as $item) <option value="{{$item->id}}">{{$item->name}}</option> @endforeach @else @foreach($subjects as $subject)\n' +
                     '                                 <option value="{{$subject->id}}">{{$subject->name}}</option>\n' +
@@ -295,21 +431,13 @@
                 x++;
             } else {
                 var array = [];
-                if (array.length >= 1) {
+                if (array.length >= 0) {
                     array.pop();
                 }
                 array.unshift("No subject");
                 $("#container").html(array);
             }
         });
-        $('form.formPoint').on('submit', function (event) {
-            $('.inputs input.point').each(function () {
-                $(this).rules("add", {
-                    required: true
-                })
-            });
-        });
-        $('form.formPoint').validate();
         $(wrapper).on('click', '.remove_button', function (e) {
             e.preventDefault();
             $(this).parent('div').remove();

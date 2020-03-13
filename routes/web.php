@@ -18,6 +18,8 @@ Route::get('/', function () {
 Route::resource('user','UserController');
 Route::get('login/user','UserController@createLogin');
 Route::post('login/post/user','UserController@storeLogin');
+Route::get('change-password','UserController@changePassword');
+Route::post('change-password','UserController@changePasswordStore');
 Route::get('logout','UserController@logout');
 Route::get('/auth/google','UserController@redirect');
 Route::get('/auth/google/callback','UserController@callback');

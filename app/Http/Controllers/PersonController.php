@@ -48,8 +48,9 @@ class PersonController extends Controller
         $search = \request('search');
         $subject_count = Subject::all()->count();
         $students = $this->personRepository->search(request()->all(), $subject_count);
+        $fas = $students->load('faculty')->all();
         $faculties = Faculty::all();
-        return view('admin.persons.index', compact('students', 'items', 'search', 'persons', 'faculties'));
+        return view('admin.persons.index', compact('students','a','fas','items', 'search', 'persons', 'faculties'));
     }
 
     /*

@@ -11,6 +11,7 @@ use http\Url;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
 class UserController extends Controller
@@ -32,7 +33,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::orderBy('id', 'desc')->paginate(10);
+        $users = User::orderBy('updated_at', 'desc')->paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
@@ -86,7 +87,8 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        //
+        $user = $this->userRepository->getListById($id);
+        return view('admin.users.update',compact('user'));
     }
 
     /**
@@ -96,9 +98,16 @@ class UserController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(RequestUser $request, $id)
     {
-        //
+        if (\auth()->user()->admin == 1){
+            $data = $request->all();
+            if ($request->hasFile('image')) {
+                $data['image'] = $this->userRepository->uploadImages();
+            }
+        }
+        $user = $this->userRepository->update($id, $data);
+        return redirect()->route('user.index')->with('success','Update success');
     }
 
     /**
@@ -185,6 +194,25 @@ class UserController extends Controller
         } catch (Exception $e) {
             return redirect('auth/google');
         }
+    }
+
+    public function changePassword(){
+        return view('admin.admin_settings');
+    }
+
+    public function changePasswordStore(Request $request){
+        $request->validate([
+            'cu-password' => 'required',
+            'password' => 'required|min:6|max:15',
+            're-password' => 'required',
+        ]);
+        $data = $request->all();
+        if(auth()->user()->password == $data['cu-password']){
+            if($data['password'] == $data['re-password']){
+                User::find(auth()->user()->id)->update(['password' => Hash::make($data['password'])]);
+            }
+        }
+        return redirect()->route('person.index')->with('success','Update password success!');
     }
 
     public function logout()

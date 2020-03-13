@@ -24,13 +24,22 @@
                         </div>
                     @endif
                 </div>
+                <div style="margin-bottom: 20px">
+                    <h4 style="display: inline; margin-left: 10px">Faculties
+                        <h5 style="display: inline">
+                            from </h5> {{$faculties->firstItem()}}
+                        <h5 style="display: inline"> to</h5> {{$faculties->lastItem()}} // {{$faculties->total()}}
+                    </h4>
+                </div>
                 <table class="table">
                     <thead>
                     <tr>
                         <th>STT</th>
                         <th>Name</th>
                         <th>Description</th>
-                        <th>Action</th>
+                        @if(auth()->user()->admin == 1)
+                            <th>Action</th>
+                        @endif
                     </tr>
                     </thead>
                     <tbody>
@@ -40,14 +49,14 @@
                             <td>{{$faculty->name}}</td>
                             <td>{{$faculty->description}}</td>
                             <td>
-                                {!! Form::open(['route' => ['faculty.destroy',$faculty->id], 'method' => 'POST']) !!}
+                                @if(auth()->user()->admin == 1)
+                                    {!! Form::open(['route' => ['faculty.destroy',$faculty->id], 'method' => 'POST']) !!}
                                     <a class="btn btn-info" href="{{ route('faculty.edit',$faculty->id) }}">Edit</a>
                                     @csrf
-                                @if(auth()->user()->admin == 1)
                                     <input name="_method" type="hidden" value="DELETE">
                                     {!! Form::submit('Delete',['class' => 'btn btn-danger']) !!}
+                                    {!! Form::close() !!}
                                 @endif
-                                {!! Form::close() !!}
                             </td>
                         </tr>
                     @endforeach

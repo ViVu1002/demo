@@ -29,28 +29,19 @@ class PointRequest extends FormRequest
     public function rules()
     {
         $data = collect(\request());
-        if(count($data) == 2){
+        if (count($data) == 2) {
             $rules['subject_id'] = 'required';
         }
-        if (count($data) == 4){
+        if (count($data) == 4) {
             $subjects = collect(\request('subject_id'));
             $point = collect(\request('point'));
             foreach ($point as $key => $item) {
                 $combined = $subjects->combine($point);
             }
-            $results = collect($combined->whereBetween('point', [0, 10]));
-            if (auth()->user()->admin == 0){
-                foreach ($results as $key => $result){
-                    $item[$key]['point']= 0;
-                }
-                $person = Person::find(\request('person_id'))->load('subjects');
-                $person->subjects()->syncWithoutDetaching($item);
-            }else{
-                $person = Person::find(\request('person_id'))->load('subjects');
-                $person->subjects()->syncWithoutDetaching($results);
-            }
+            $results = collect($combined->whereBetween('point', [1, 10]));
+            $person = Person::find(\request('person_id'))->load('subjects');
+            $person->subjects()->syncWithoutDetaching($results);
         }
-
         $rules = [];
         if (!empty(\request('point'))) {
             foreach (\request('point') as $key => $value) {
@@ -64,9 +55,9 @@ class PointRequest extends FormRequest
     {
         $messages = [];
         $data = collect(\request());
-        if(count($data) == 2){
+        if (count($data) == 2) {
             $messages['subject_id.required'] = 'No subjects';
-        }else{
+        } else {
             $results = collect(Subject::whereIn('id', \request('subject_id'))->get());
             foreach ($results as $key => $item) {
                 $messages['point.' . $key . '.point.required'] = '' . $item->name . ' field must not be blank';

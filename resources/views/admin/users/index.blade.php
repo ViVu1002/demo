@@ -13,10 +13,9 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="login-panel panel panel-default"
-                     style="height: 50px; padding-top: 10px; margin-bottom: 50px">
+                <div class="login-panel panel panel-default" style="height: 50px; padding-top: 10px; margin-bottom: 70px">
                     @if ($message = Session::get('success'))
-                        <div class="alert alert-success" style="margin-top: 59px">
+                        <div class="alert alert-success" style="margin-top: 50px">
                             <p>{{ $message }}</p>
                         </div>
                     @endif
@@ -27,6 +26,13 @@
                             <strong>{!! session('flash_message_info') !!}</strong>
                         </div>
                     @endif
+                </div>
+                <div style="margin-bottom: 20px">
+                    <h4 style="display: inline; margin-left: 10px">Users
+                        <h5 style="display: inline">
+                            from </h5> {{$users->firstItem()}}
+                        <h5 style="display: inline"> to</h5> {{$users->lastItem()}} // {{$users->total()}}
+                    </h4>
                 </div>
                 <table class="table">
                     <thead>

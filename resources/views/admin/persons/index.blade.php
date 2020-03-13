@@ -84,61 +84,78 @@
                     {!! Form::submit('Submit',['class' => 'btn btn-info','style' => 'margin: 30px 0 20px 40px']) !!}
                     {{ Form::close() }}
                 </div>
-                <h4 style="display: inline">Students <h5 style="display: inline">from </h5> {{$students->firstItem()}}
-                    <h5 style="display: inline"> to</h5> {{$students->lastItem()}} // {{$students->total()}}</h4>
-                @if($students->total() > 0)
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th>Name</th>
-                            <th>Image</th>
-                            <th>Email</th>
-                            <th>Faculty</th>
-                            <th>Address</th>
-                            <th>Phone</th>
-                            <th>Action</th>
-                            @if(auth()->user()->admin == 1)
-                                <a href="/test"
-                                   style="background: #3e8f3e;display: inline-block;width: 70px;float: right;height: 43px;color: floralwhite">Send
-                                    Email</a>
-                            @endif
-                        </tr>
-                        </thead>
-                        <tbody id="posts-crud">
-                        @foreach($students as $key => $student)
-                            <tr id="post_id_{{ $student->id }}">
-                                <td>{{ $key+1 }}</td>
-                                <td style="width: 100px;">{{$student->name}}</td>
-                                <td>
-                                    <img src="{{asset($student->image)}}" style="width: 80px;height: 80px">
-                                </td>
-                                <td style="width: 100px">{{$student->email}}</td>
-                                <td style="width: 80px">{{$student->faculty->name}}</td>
-                                <td style="width: 100px">{{$student->address}}</td>
-                                <td style="width: 100px">{{$student->phone}}</td>
-                                <td>
-                                    {!! Form::open(['route' => ['person.destroy',$student->id],'method' => 'POST']) !!}
-                                    <a class="btn btn-success"
-                                       href="{{ route('person.show',$student->slug) }}">Detail</a>
-                                    <a class="btn btn-info" href="{{ route('person.edit',$student->id) }}">Edit</a>
-                                    <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
-                                       data-id="{{ $student->id }}"
-                                       class="btn btn-info">Edit popup</a>
-                                    @csrf
-                                    @method('DELETE')
-                                    @if(auth()->user()->admin == 1)
-                                        {!! Form::submit('Delete',['class' => 'btn btn-danger']) !!}
-                                    @endif
-                                    {!! Form::close() !!}
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                    {!! $students->render() !!}
+                @if($students == '')
+                    <h4>No persons</h4>
                 @else
-                    <div>No students.</div>
+                    <h4 style="display: inline">Students <h5 style="display: inline">
+                            from </h5> {{$students->firstItem()}}
+                        <h5 style="display: inline"> to</h5> {{$students->lastItem()}} // {{$students->total()}}</h4>
+                    @if($students->total() > 0)
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Name</th>
+                                <th>Image</th>
+                                <th>Email</th>
+                                <th>Faculty</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>Action</th>
+                                @if(auth()->user()->admin == 1)
+                                    <a href="/test"
+                                       style="background: #3e8f3e;display: inline-block;width: 70px;float: right;height: 43px;color: floralwhite">Send
+                                        Email</a>
+                                @endif
+                            </tr>
+                            </thead>
+                            <tbody id="posts-crud">
+                            @foreach($students as $key => $student)
+                                <tr id="post_id_{{ $student->id }}">
+                                    <td>{{ $key+1 }}</td>
+                                    <td style="width: 100px;">{{$student->name}}</td>
+                                    <td>
+                                        <img src="{{asset($student->image)}}" style="width: 80px;height: 80px">
+                                    </td>
+                                    <td style="width: 100px">{{$student->email}}</td>
+                                    @foreach($faculties as $faculty)
+                                        @if($student->faculty_id == $faculty->id)
+                                            <td style="width: 80px">{{$faculty->name}}</td>
+                                        @endif
+                                    @endforeach
+                                    <td style="width: 100px">{{$student->address}}</td>
+                                    <td style="width: 100px">{{$student->phone}}</td>
+                                    <td>
+                                        {!! Form::open(['route' => ['person.destroy',$student->id],'method' => 'POST']) !!}
+                                        <a class="btn btn-success"
+                                           href="{{ route('person.show',$student->slug) }}">Detail</a>
+
+                                        @if(auth()->user()->admin == 1)
+{{--                                            <a class="btn btn-info"--}}
+{{--                                               href="{{ route('person.edit',$student->id) }}">Edit</a>--}}
+                                            <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
+                                               data-id="{{ $student->id }}"
+                                               class="btn btn-info">Edit popup</a>
+                                            @csrf
+                                            @method('DELETE')
+                                            {!! Form::submit('Delete',['class' => 'btn btn-danger']) !!}
+                                        @else
+                                            @if(auth()->user()->email  ==$student->email)
+                                                <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
+                                                   data-id="{{ $student->id }}"
+                                                   class="btn btn-info">Edit popup</a>
+                                            @endif
+                                        @endif
+                                        {!! Form::close() !!}
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                        {!! $students->render() !!}
+                    @else
+                        <div>No students.</div>
+                    @endif
                 @endif
             </div>
         </div>
@@ -174,13 +191,8 @@
                                     {!! Form::label('gender','Gender') !!}
                                     <span class="required">*</span>
                                 </div>
-                                @if($student->gender == 1)
-                                    Male {!! Form::radio('gender','1', true) !!}
-                                    Female {!! Form::radio('gender','2', false) !!}
-                                @else
-                                    Male {!! Form::radio('gender','1', false) !!}
-                                    Female {!! Form::radio('gender','2', true) !!}
-                                @endif
+                                Male {!! Form::radio('gender','1',['class' => 'radio']) !!}
+                                Female {!! Form::radio('gender','2',['class' => 'radio']) !!}
                             </div>
                             <div class="form-group" style="margin-left: 20px">
                                 {!! Form::label('address','Address') !!}
@@ -240,7 +252,7 @@
                     $("#id").val(data.id);
                     $("#name").val(data.name);
                     $("#email").val(data.email);
-                    $("input[type='radio']:checked").val(data.gender);
+                    $(".radio:checked").val(data.gender);
                     $("#address").val(data.address);
                     $("#phone").val(data.phone);
                     $("#faculty_id").val(data.faculty_id);
@@ -280,7 +292,6 @@
                             $('#ajax-crud-modal').modal('hide');
                             location.reload();
                         }
-
                     },
                 });
             });
