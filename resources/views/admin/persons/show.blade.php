@@ -29,7 +29,7 @@
                     <em class="fa fa-home"></em>
                 </a></li>
             <li><a href="{{ url('/dashboard')}}">Dashboard</a></li>
-            <li class="active">Sinh viên</li>
+            <li class="active">{{ __('Students') }}</li>
         </ol>
     </div><!--/.row-->
 
@@ -38,7 +38,16 @@
             <div class="login-panel panel panel-default"
                  style="height: 50px; padding-top: 10px">
                 <div style="display: inline;">
-                    <a style="font-size: 20px" href="{{route('person.index')}}">Person</a>
+                    <a style="font-size: 20px" href="{{url('person')}}">@lang('index.Students')</a>
+                </div>
+                <div class="dropdown" style="float: right">
+                    <button class="btn btn-secondary dropdown-toggle" style="margin-top: -10px" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        @lang('index.Languages')
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="{{ url('en/person',$person->slug) }}">@lang('index.English')</a>
+                        <a class="dropdown-item" href="{{ url('vi/person',$person->slug) }}">@lang('index.Viet Nam')</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -57,34 +66,32 @@
                 </div>
                 <div class="col-lg-9" style="margin-top: 10px">
                     <h2>{{$person->name}}</h2>
-                    <h5>Email : {{$person->email}}</h5>
-                    <h5>Faculty : {{$person->faculty->name}}</h5>
+                    <h5>@lang('index.Email') : {{$person->email}}</h5>
+                    <h5>@lang('index.Faculty') : {{$person->faculty->name}}</h5>
                     @if($person->gender == 1)
-                        <h5> Gender : Male</h5>
+                        <h5> @lang('index.Gender') : @lang('index.Male')</h5>
                     @else
-                        <h5>Gender : Female</h5>
+                        <h5>@lang('index.Gender') : @lang('index.Female')</h5>
                     @endif
-                    <h5>Address : {{$person->address}}</h5>
-                    <h5>Date : {{$person->date}}</h5>
-                    <h5>Phone : {{$person->phone}}</h5>
-                    <a data-toggle="modal" data-target="#ajax-crud-modal" id="edit-post"
-                       data-id="{{ $person->id }}"
-                       class="btn btn-info">Edit popup</a>
+                    <h5>@lang('index.Address') : {{$person->address}}</h5>
+                    <h5>@lang('index.Date') : {{$person->date}}</h5>
+                    <h5>@lang('index.Phone') : {{$person->phone}}</h5>
+                    <a href="{{ url('person-update',$person->id) }}" class="btn btn-info">@lang('index.Update student')</a>
                 </div>
             </div>
         </div>
         <div class="col-lg-7" style="margin-top: 10px">
-            <h3>Subject</h3>
+            <h3>@lang('index.Subject')</h3>
             <div class="row">
                 <div class="col-lg-12">
                     <table class="table">
                         <thead>
                         <tr>
                             <th>STT</th>
-                            <th>Subject</th>
-                            <th>Point</th>
+                            <th>@lang('index.Subject')</th>
+                            <th>@lang('index.Point')</th>
                             @if(auth()->user()->admin == 1)
-                                <th>Action</th>
+                                <th>@lang('index.Action')</th>
                             @endif
                         </tr>
                         </thead>
@@ -130,7 +137,7 @@
             </ul>
         </div>
     @endif
-    <h3>Update subject</h3>
+    <h3>@lang('index.Update subject')</h3>
     @if(auth()->user()->admin == 0)
         <div class="row">
             <div class="col-lg-6">
@@ -138,7 +145,7 @@
                 @csrf
                 <input type="hidden" name="person_id" value="{{$person->id}}">
                 <div class="field_wrapper" style="margin-top: 20px">
-                    <h4 style="display: inline;">Create point</h4>
+                    <h4 style="display: inline;">@lang('index.Create point')</h4>
                     <a href="javascript:void(0);" class="add_button" style="display: inline;"
                        title="Add field">
                         <i class="fas fa-plus-circle"></i>
@@ -210,7 +217,7 @@
                     </select>
                 @endforeach
                 <div class="field_wrapper" style="margin-top: 20px">
-                    <h4 style="display: inline;">Create point</h4>
+                    <h4 style="display: inline;">@lang('index.Create point')</h4>
                     <a href="javascript:void(0);" class="add_button" style="display: inline;"
                        title="Add field">
                         <i class="fas fa-plus-circle"></i>
@@ -267,85 +274,6 @@
             </div>
         </div>
     @endif
-
-    <div class="modal fade" id="ajax-crud-modal" tabindex="-1" role="dialog" aria-labelledby="ajax-crud-modal"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="editForm" enctype="multipart/form-data">
-                @method('PUT')
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="postCrudModal">Update student</h4>
-                        <button aria-hidden="true" class="close" data-dismiss="modal" type="button">
-                            ×
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert" id="message" style="display: none">
-                            <ul></ul>
-                        </div>
-                        <div class="form-group" style="margin-left: 20px;margin-top: 20px">
-                            <input type="hidden" name="id" id="id">
-                            {!! Form::label('name','Name') !!}
-                            <span class="required">*</span>
-                            {!! Form::text('name','',['class' => 'form-control','id' => 'name', 'placeholder' => 'Name', 'style' => 'margin-top:15px;'])  !!}
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            {!! Form::label('email','Email') !!}
-                            <span class="required">*</span>
-                            {!! Form::email('email','',['class' => 'form-control','id' => 'email','placeholder' => 'Email']) !!}
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            <div>
-                                {!! Form::label('gender','Gender') !!}
-                                <span class="required">*</span>
-                            </div>
-                            Male {!! Form::radio('gender','1',['class' => 'radio']) !!}
-                            Female {!! Form::radio('gender','2',['class' => 'radio']) !!}
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            {!! Form::label('address','Address') !!}
-                            <span class="required">*</span>
-                            {!! Form::text('address','',['id' => 'address' ,'class'=>'form-control','placeholder'=>'Address']) !!}
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            {!! Form::label('phone','Phone') !!}
-                            <span class="required">*</span>
-                            <input class="form-control" type="text" value=""
-                                   placeholder="Phone" name="phone" id="phone">
-                        </div>
-                        <div class="form-group" style="width: 50%; margin-left: 20px">
-                            {!! Form::label('faculty_id','Faculty') !!}
-                            <span class="required">*</span>
-                            <select class="form-control" name="faculty_id" id="faculty_id">
-                                @foreach($faculties as $faculty)
-                                    <option value="{{$faculty->id}}">{{$faculty->name}}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            {!! Form::label('image','Image') !!}
-                            <span class="required">*</span>
-                            <img src="" id="file"
-                                 style="width: 80px;height:80px;margin:0 0 20px 30px" name="file">
-                            {!! Form::file('image') !!}
-                        </div>
-                        <div class="form-group" style="margin-left: 20px">
-                            {!! Form::label('date','Date') !!}
-                            <span class="required">*</span>
-                            {{ Form::date('date', '', ['class' => 'form-control','id' => 'date']) }}
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-info" id="btn-edit" type="submit" value="add">
-                            Update student
-                        </button>
-                        <input class="btn btn-default" data-dismiss="modal" type="button" value="Cancel">
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 </div><!--/.row-->
 <script src="{{ asset('js/back/jquery-1.11.1.min.js')}}"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -356,64 +284,10 @@
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js" type="text/javascript"></script>
 <script src="demoValidation.js" type="text/javascript"></script>
+<script src="{{ asset('js/back/updateJquery.js') }}"></script>
 <script>
     //add point
     $(document).ready(function () {
-        //edit
-        const URL = "http://127.0.0.1:8000";
-        $('body').on('click', '#edit-post', function () {
-            var id = $(this).data('id');
-            $.get(URL + `/person/${id}` + `/edit`, function (data) {
-                $("#postCrudModal").html("Edit student");
-                $('#btn-save').val("edit-post");
-                $("#ajax-crud-modal").modal('show');
-                $("#id").val(data.id);
-                $("#name").val(data.name);
-                $("#email").val(data.email);
-                $(".radio:checked").val(data.gender);
-                $("#address").val(data.address);
-                $("#phone").val(data.phone);
-                $("#faculty_id").val(data.faculty_id);
-                $("#date").val(data.date);
-                $("#file").attr('src', data.image);
-            });
-        });
-
-        $("#editForm").on('submit', function (e) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            e.preventDefault();
-            var formData = new FormData($(this)[0]);
-            $.ajax({
-                type: 'POST',
-                url: URL + `/person/` + $("#editForm input[name=id]").val(),
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    if (data.errors) {
-                        console.log(data);
-                        $('#message').css('display', 'block');
-                        $.each(data, function (key, value) {
-                            $("#message").find("ul").append('<li>' + value + '</li>');
-                        });
-                        $('#message').html(data.message);
-                        $('#message').addClass(data.class_name);
-                    }
-                    if (data.success) {
-                        console.log(data);
-                        alert('Update success');
-                        $('#ajax-crud-modal').modal('hide');
-                        location.reload();
-                    }
-
-                },
-            });
-        });
         //point
         var subject_points = $(@json($subject_points));
         var maxField = subject_points.length;

@@ -14,8 +14,8 @@
             <div class="col-lg-12">
                 <div class="login-panel panel panel-default">
                     <div class="panel-heading">Sinh viên</div>
-                    {!! Form::open(['route' => ['person.update',$person->id],'method'=>'post','enctype' => 'multipart/form-data','files' => 'true']) !!}
-                    @method('put')
+                    {!! Form::open(['url' => ['person-update',$person->id],'method'=>'post','enctype' => 'multipart/form-data','files' => 'true']) !!}
+                    @method('post')
                     <div class="form-group" style="margin : 20px 0 0 20px">
                         <input type="hidden" value="{{$person->id}}" name="id">
                         {!! Form::label('name','Name') !!}

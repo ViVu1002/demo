@@ -15,7 +15,7 @@
             <div class="col-lg-12">
                 <div class="login-panel panel panel-default">
                     <div class="panel-heading">Khoa</div>
-                    {!! Form::open(['route' => ['faculty.store'],'enctype' => 'multipart/form-data']) !!}
+                    {!! Form::open(['url' => ['faculty/create'],'enctype' => 'multipart/form-data']) !!}
                     <div class="form-group" style="margin-left: 20px">
                         {!! Form::label('name','Name') !!}
                         <span class="required">*</span>

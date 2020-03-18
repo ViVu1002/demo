@@ -32,22 +32,16 @@
                         @foreach($errors->all() as $error)
                             <li>{{$error}}</li>
                         @endforeach
-                        <form role="form" method="post" action="{{url('change-password')}}">
-                           @csrf
+                        <form role="form" method="post" action="{{url('change-update-password',$user->id)}}">
+                            @csrf
                             <fieldset>
-                                <div class="form-group">
-                                    {!! Form::label('cu_password','Current password') !!}
-                                    <span style="color: red"> *</span>
-                                    <input class="form-control" placeholder="Current password" name="cu_password"
-                                           type="password" value="">
-                                </div>
                                 <div class="form-group">
                                     {!! Form::label('password','Password') !!}
                                     <span style="color: red"> *</span>
                                     <input class="form-control" placeholder="Password" name="password" type="password" value="">
                                 </div>
                                 <div class="form-group">
-                                    {!! Form::label('re_password','Re_password') !!}
+                                    {!! Form::label('password','Re_password') !!}
                                     <span style="color: red"> *</span>
                                     <input class="form-control" placeholder="Re_password" name="re_password"
                                            type="password">

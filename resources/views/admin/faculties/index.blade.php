@@ -16,7 +16,7 @@
                 <div class="login-panel panel panel-default"
                      style="height: 50px; padding-top: 10px; margin-bottom: 50px">
                     <div style="display: inline;">
-                        <a style="font-size: 20px; margin-left: 20px;" href="{{route('faculty.create')}}">Create</a>
+                        <a style="font-size: 20px; margin-left: 20px;" href="{{ route('faculty.create') }}">Create</a>
                     </div>
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success" style="margin-top: 8px">

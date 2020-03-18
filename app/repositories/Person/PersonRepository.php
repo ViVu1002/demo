@@ -27,7 +27,7 @@ class PersonRepository extends BaseRepository implements PersonRepositoryInterfa
         return sprintf('picture/%s', $name);
     }
 
-    public function search($request = [], $subject_count = 0, $paginate = 50)
+    public function search($request = [],$subject_count = 0, $paginate = 50)
     {
         $students = $this->model->newQuery();
         if (!empty($request['pagination'])) {
@@ -49,7 +49,7 @@ class PersonRepository extends BaseRepository implements PersonRepositoryInterfa
                 $min = Carbon::now()->subYear($request['min_age'])->startOfYear()->format('Y-m-d');
                 $students->whereDate('date', '<=', $min);
             }
-            if (!empty($request['max_age']) >=0) {
+            if ($request['max_age'] !== null && $request['max_age'] >=0) {
                 $max = Carbon::now()->subYear($request['max_age'])->startOfYear()->format('Y-m-d');
                 $students->whereDate('date', '>=', $max);
             }

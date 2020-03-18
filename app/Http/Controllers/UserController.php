@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestUser;
+use App\Http\Requests\UpdatePassword;
+use App\Http\Requests\UpdatePasswordUser;
 use App\Person;
 use App\Repositories\User\UserRepositoryInterface;
 use \App\Repositories\Person\PersonRepositoryInterface;
@@ -88,7 +90,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = $this->userRepository->getListById($id);
-        return view('admin.users.update',compact('user'));
+        return view('admin.users.update', compact('user'));
     }
 
     /**
@@ -100,14 +102,14 @@ class UserController extends Controller
      */
     public function update(RequestUser $request, $id)
     {
-        if (\auth()->user()->admin == 1){
+        if (\auth()->user()->admin == 1) {
             $data = $request->all();
             if ($request->hasFile('image')) {
                 $data['image'] = $this->userRepository->uploadImages();
             }
         }
         $user = $this->userRepository->update($id, $data);
-        return redirect()->route('user.index')->with('success','Update success');
+        return redirect()->route('user.index')->with('success', 'Update success');
     }
 
     /**
@@ -132,7 +134,7 @@ class UserController extends Controller
         $data = $request->only('email', 'password');
         if (Auth::attempt($data)) {
             if (auth()->user()->admin == 1) {
-                return redirect()->route('person.index')->with('success', 'Login success');
+                return redirect()->to('en/person')->with('success', 'Login success');
             } else {
                 $persons = DB::table('persons')->select(['slug', 'email'])->get();
                 $user = $persons->whereIn('email', $data['email']);
@@ -196,25 +198,29 @@ class UserController extends Controller
         }
     }
 
-    public function changePassword(){
+    public function changePassword()
+    {
         return view('admin.admin_settings');
     }
 
-    public function changePasswordStore(Request $request){
-        $request->validate([
-            'cu-password' => 'required',
-            'password' => 'required|min:6|max:15',
-            're-password' => 'required',
-        ]);
+    public function changePasswordStore(UpdatePassword $request)
+    {
         $data = $request->all();
-        if(auth()->user()->password == $data['cu-password']){
-            if($data['password'] == $data['re-password']){
-                User::find(auth()->user()->id)->update(['password' => Hash::make($data['password'])]);
-            }
-        }
-        return redirect()->route('person.index')->with('success','Update password success!');
+        User::find(auth()->user()->id)->update(['password' => $data['password']]);
+        return redirect()->route('person.index')->with('success', 'Update password success!');
     }
 
+    public function changeUpdatePassword($id){
+        $user = $this->userRepository->getListById($id);
+        return view('admin.update_password',compact('user'));
+    }
+
+    public function changeUpdatePasswordStore(UpdatePasswordUser $request, $id){
+        $user = $this->userRepository->getListById($id);
+        $data = $request->all();
+        User::find($user->id)->update(['password' => $data['password']]);
+        return redirect()->route('user.index')->with('success','Update password success!');
+    }
     public function logout()
     {
         Auth::logout();

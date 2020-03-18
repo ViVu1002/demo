@@ -13,12 +13,10 @@ use App\Repositories\Subject\SubjectRepositoryInterface;
 use App\Repositories\Point\PointRepositoryInterface;
 use App\Subject;
 use App\Person;
-use function GuzzleHttp\Promise\all;
-use Illuminate\Support\Facades\DB;
 use Validator;
 use Illuminate\Http\Request;
 use Response;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\App;
 
 class PersonController extends Controller
 {
@@ -35,6 +33,7 @@ class PersonController extends Controller
         $this->facultyRepository = $facultyRepository;
         $this->subjectRepository = $subjectRepository;
         $this->pointRepository = $pointRepository;
+        $this->middleware('auth');
     }
 
     /**
@@ -42,9 +41,9 @@ class PersonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $request->flash();
+        \request()->flash();
         $search = \request('search');
         $subject_count = Subject::all()->count();
         $students = $this->personRepository->search(request()->all(), $subject_count);
@@ -73,11 +72,13 @@ class PersonController extends Controller
      */
     public function store(RequestPerson $request)
     {
+        $locale = \App::getLocale();
+        dd($locale);
         $data = $request->all();
         $data['image'] = $this->personRepository->uploadImages();
         $data['slug'] = str_slug($data['name']);
         $post = $this->personRepository->create($data);
-        return redirect()->route('person.index', compact('post'))->with('success', 'Create person success!');
+        return redirect()->to('en/person', compact('post'))->with('success', 'Create person success!');
     }
 
     /**
@@ -110,14 +111,16 @@ class PersonController extends Controller
      */
     public function edit($id)
     {
-//        $faculties = $this->facultyRepository->getAllList();
-//        $subjects = $this->subjectRepository->getAllList();
-//        $person = $this->personRepository->getListById($id);
-
         $where = array('id' => $id);
         $student = Person::where($where)->first();
         return Response::json($student);
-        //return view('admin.persons.update', compact('person', 'faculties', 'subjects'))->render();
+    }
+
+    public function getEditPerson($id){
+        $faculties = $this->facultyRepository->getAllList();
+        $subjects = $this->subjectRepository->getAllList();
+        $person = $this->personRepository->getListById($id);
+        return view('admin.persons.update', compact('person', 'faculties', 'subjects'))->render();
     }
 
     /**
@@ -155,8 +158,16 @@ class PersonController extends Controller
             'person' => $person,
             'success' => 'Update success',
         ]);
+    }
 
-        //return redirect()->route('person.index', compact('person'))->with('success', 'Update person success!');
+    public function updateEditPerson(RequestPerson $request, $id){
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $data['image'] = $this->personRepository->uploadImages();
+        }
+        $data['slug'] = str_slug($data['name']);
+        $this->personRepository->update($id, $data);
+        return redirect()->to('en/person')->with('success', 'Update person success!');
     }
 
     /**
@@ -168,7 +179,7 @@ class PersonController extends Controller
     public function destroy($id)
     {
         $this->personRepository->delete($id);
-        return redirect()->route('person.index')->with('success', 'Delete person success!');
+        return redirect()->back()->with('success', 'Delete person success!');
     }
 
     public function createOrUpdate(PointRequest $request, $id)

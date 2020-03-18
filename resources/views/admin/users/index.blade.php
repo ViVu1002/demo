@@ -13,7 +13,8 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="login-panel panel panel-default" style="height: 50px; padding-top: 10px; margin-bottom: 70px">
+                <div class="login-panel panel panel-default"
+                     style="height: 50px; padding-top: 10px; margin-bottom: 70px">
                     @if ($message = Session::get('success'))
                         <div class="alert alert-success" style="margin-top: 50px">
                             <p>{{ $message }}</p>
@@ -51,12 +52,12 @@
                             <td>{{$user->email}}</td>
                             <td>
                                 <form action="{{ route('user.destroy',$user->id) }}" method="POST">
-                                    <a class="btn btn-info" href="{{ route('user.edit',$user->id) }}">Edit</a>
-                                    {{csrf_field()}}
-                                    @if(auth()->user()->admin == 1)
-                                        <input name="_method" type="hidden" value="DELETE">
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    @endif
+                                    <a class="btn btn-info" href="{{ route('user.edit',$user->id) }}">Edit students</a>
+                                    <a class="btn btn-primary" href="{{url('change-update-password',$user->id)}}">Edit
+                                        password</a>
+                                    @csrf
+                                    <input name="_method" type="hidden" value="DELETE">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
                                 </form>
                             </td>
                         </tr>

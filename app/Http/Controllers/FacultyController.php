@@ -6,7 +6,7 @@ use App\Faculty;
 use App\Http\Requests\RequestFaculty;
 use App\Repositories\Faculty\FacultyRepositoryInterface;
 use Illuminate\Http\Request;
-
+use Redirect;
 class FacultyController extends Controller
 {
     protected $facultyRepository;
@@ -45,9 +45,10 @@ class FacultyController extends Controller
      */
     public function store(RequestFaculty $request)
     {
+        $locale = \App::getLocale();
         $data = $request->all();
-        $faculty = $this->facultyRepository->create($data);
-        return redirect()->route('faculty.index', compact('faculty'))->with('success', 'Create faculty success!');
+        $this->facultyRepository->create($data);
+        return Redirect::to($locale.'/faculty')->with('success', 'Create faculty success!');
     }
 
     /**
